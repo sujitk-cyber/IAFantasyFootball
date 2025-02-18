@@ -1,0 +1,14 @@
+{
+  "name": "iafantasyfootball",
+  "version": "1.0.0",
+  "description": "Fantasy Football Rankings with Yahoo OAuth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "dotenv": "^10.0.0",
+    "oauth": "^0.9.15"
+  }
+}

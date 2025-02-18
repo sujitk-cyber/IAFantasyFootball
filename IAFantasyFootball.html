@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yahoo Fantasy Football Rankings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .position-section {
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+        .expert-column {
+            background-color: #f8f9fa;
+        }
+        .consensus-rank {
+            font-weight: bold;
+            color: #2c5282;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="auth-section">
+            <button id="auth-button" onclick="window.location.href='/auth'">
+                Login with Yahoo
+            </button>
+        </div>
+        <h1>Yahoo Fantasy Football Rankings</h1>
+        <div id="loading" class="loading">Loading rankings...</div>
+        <div id="rankings"></div>
+    </div>
+
+    <script>
+        const positions = ['QB', 'RB', 'WR', 'TE', 'DST', 'K'];
+        const experts = ['Andy Behrens', 'Scott Pianowski', 'Dalton Del Don', 'Matt Harmon'];
+
+        function displayRankings(position, players) {
+            const rankingsDiv = document.getElementById('rankings');
+            
+            const section = document.createElement('div');
+            section.className = 'position-section';
+            section.innerHTML = `
+                <h2>${position} Rankings</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Team</th>
+                            <th>Opponent</th>
+                            <th>% Rostered</th>
+                            ${experts.map(expert => `<th class="expert-column">${expert}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody id="${position}-rankings">
+                    </tbody>
+                </table>
+            `;
+            
+            rankingsDiv.appendChild(section);
+        }
+
+        async function fetchRankings(position) {
+            try {
+                const response = await fetch(`/api/rankings/${position}`);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/auth';
+                        return;
+                    }
+                    throw new Error('Failed to fetch rankings');
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                return [];
+            }
+        }
+
+        async function populateRankings() {
+            for (const position of positions) {
+                const rankings = await fetchRankings(position);
+                if (rankings && rankings.length > 0) {
+                    displayRankings(position, rankings);
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateRankings();
+        });
+    </script>
+</body>
+</html>
